@@ -47,7 +47,7 @@ cpu_automata.o: cpu/cpu_automata.cc
 	$(CC) -std=c++11 -c -o $@ cpu/cpu_automata.cc
 
 gpu_automata: gpu/gpu_automata.cc gpu_automata_cuda.o
-	$(CC) -std=c++11 $< -o $@ gpu/gpu_automata.cc gpu_automata_cuda.o -O3 $(LDFLAGS) -lcurand -Wall -I$(CUDA_INC_PATH) -fopenmp
+	$(CC) -std=c++11 $< -o $@ gpu_automata_cuda.o -O3 $(LDFLAGS) -lcurand -Wall -I$(CUDA_INC_PATH) -fopenmp
 
 gpu_automata_cuda.o: gpu/gpu_automata_cuda.cu
 	$(NVCC) $(NVCCFLAGS) -O3 $(EXTRA_NVCCFLAGS) $(GENCODE_FLAGS) -I$(CUDA_INC_PATH) -o $@ -c $<

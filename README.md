@@ -2,11 +2,11 @@
 
 To compile: `make`
 
-To list the available automata: `./cpu_automata list` or `./gpu_automata list`
+To list the available automata: `./cpu_automata list` (not available for gpu)
 
 To run a CPU automaton: `./cpu_automata <x_dim> <y_dim> <z_dim> <automaton number>`
 
-To run a GPU autamaton  `./gpu_automata <x_dim> <y_dim> <z_dim> <automaton number> <blocks> <threadsPerBlock>`
+To run a GPU autamaton  `./gpu_automata <x_dim> <y_dim> <z_dim> <blocks> <threadsPerBlock>`
 
 (Maybe some sort of initial density parameter will be added to the run commands)
 

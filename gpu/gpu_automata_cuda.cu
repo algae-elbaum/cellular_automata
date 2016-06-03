@@ -1,5 +1,15 @@
 #include "gpu_automata_cuda.cuh"
 
+
+// TODO Experiment with this function
+__device__ bool update_fun(bool *neighbors)
+{
+    int count = 0;
+    for (int i= 0; i < 26; i++)
+        count += neighbors[i] ? 1 : 0;
+    return count % 3;
+}
+
 __device__ int get_index(int x, int y, int z, int xdim, int ydim, int zdim)
 {
     return (x * ydim * zdim) + (y * zdim) + z;
@@ -56,7 +66,7 @@ __global__  void cuda_init_field_kernel(float *rands, bool *field, int length)
 }
 
 __global__ void cuda_automaton_step_kernel(bool *old_field, bool *new_field,
-        int xdim, int ydim, int zdim, bool (*update_fun)(bool *neighbors))
+        int xdim, int ydim, int zdim)
 {
     int thread_idx = blockIdx.x * blockDim.x + threadIdx.x;
     for (int i = thread_idx; i < xdim * ydim * zdim; i += gridDim.x * blockDim.x)
@@ -77,9 +87,8 @@ void cuda_call_init_field_kernel(const unsigned int blocks,
 
 void cuda_call_automaton_step_kernel(const unsigned int blocks,
         const unsigned int threadsPerBlock,
-        bool *old_field, bool *new_field, int xdim, int ydim, int zdim,
-        bool (*update_fun)(bool *neighbors))
+        bool *old_field, bool *new_field, int xdim, int ydim, int zdim)
 {
     cuda_automaton_step_kernel<<<blocks, threadsPerBlock>>>
-        (old_field, new_field, xdim, ydim, zdim, update_fun);
+        (old_field, new_field, xdim, ydim, zdim);
 }
