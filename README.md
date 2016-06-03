@@ -6,7 +6,7 @@ To list the available automata: `./cpu_automata list` or `./gpu_automata list`
 
 To run a CPU automaton: `./cpu_automata <x_dim> <y_dim> <z_dim> <automaton number>`
 
-To run a GPU autamaton  `./gpu_automata <x_dim> <y_dim> <z_dim> <automaton number>`
+To run a GPU autamaton  `./gpu_automata <x_dim> <y_dim> <z_dim> <automaton number> <blocks> <threadsPerBlock>`
 
 (Maybe some sort of initial density parameter will be added to the run commands)
 
