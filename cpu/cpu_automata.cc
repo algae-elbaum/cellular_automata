@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 
         if (argc != 5)
         {
-            fprintf(stderr, "Usage: \"%s <y_dim> <x_dim> <z_dim> <automaton number>\" or \"%s list\"\n",
+            fprintf(stderr, "Usage: \"%s <x_dim> <y_dim> <z_dim> <automaton number>\" or \"%s list\"\n",
                     argv[0], argv[0]);
             exit(EXIT_FAILURE);
         }

@@ -4,10 +4,13 @@
 #include <cstdlib>
 #include <random>
 #include <functional>
+#include <time.h>
+#include <unistd.h>
 
 #include "gpu_automata_cuda.cuh"
 
 #define DEBUG 1
+#define US_BW_GEN 300000
 
 using namespace std;
 
@@ -35,8 +38,21 @@ void checkCUDAKernelError()
 }
 
 
-uniform_real_distribution<float> distribution(0, 1);
-mt19937 engine;
+void print_lvl(bool *display_lvl, int ydim, int zdim)
+{
+    char lvl_str[(ydim + 1) * zdim];
+    int line = 0;
+    for (int i = 0; i < ydim * zdim; i++)
+    {
+        lvl_str[i + line] = display_lvl[i] ? 'x' : ' ';
+        if (i % zdim == 0)
+        {
+            line ++;
+            lvl_str[i + line] = '\n';
+        }
+    }
+    printf("%s\n----------------------------------\n", lvl_str);
+}
 
 void init_field(bool *field, int size, int blocks, int threadsPerBlock)
 {
@@ -44,6 +60,7 @@ void init_field(bool *field, int size, int blocks, int threadsPerBlock)
     curandCreateGenerator(&generator, CURAND_RNG_PSEUDO_DEFAULT);
     float *rand_floats;
     cudaMalloc(&rand_floats, sizeof(float) * size);
+    curandGenerateUniform(generator, rand_floats, size);
     cuda_call_init_field_kernel(blocks, threadsPerBlock, rand_floats, field, size);
 }
 
@@ -112,8 +129,13 @@ int main(int argc, char **argv)
     checkCUDAKernelError();
 
     bool *old_field, *new_field;
+    bool display_lvl[ydim * zdim];
+    clock_t t1 = clock();
     for (int count = 0; count < 1040; count++)
     {
+        // Aim for US_BW_GEN microseconds between generations. This basically
+        // defeats the purpose of using the gpu, but whatever
+        usleep(max(0, (int)(US_BW_GEN - (difftime(clock(), t1))/1000000)));
 #if DEBUG
         printf("Running generation %d\n", count);
 #endif
@@ -122,5 +144,18 @@ int main(int argc, char **argv)
         cuda_call_automaton_step_kernel(blocks, threadsPerBlock, old_field, new_field,
             xdim, ydim, zdim);
         checkCUDAKernelError();
+
+        // I really want to be using ncurses (optimally opengl, but that's not
+        // happening), but it's not installed and it's probably too late to ask
+        // for it to be installed.
+        // So instead I'm doing the awful awful thing of just printing it straight
+        // to terminal. And part of that is that letting the user change level
+        // is not doable in any nice way that I know of. Therefore I'm going to
+        // make the executive decision that the level displayed will be the one
+        // at x = 1 (or 0 if xdim = 1).
+        int lvl = xdim == 1 ? 0 : 1;
+        cudaMemcpy(display_lvl, new_field + (lvl * ydim * zdim),
+                ydim * zdim * sizeof(bool), cudaMemcpyDeviceToHost);
+        print_lvl(display_lvl, ydim, zdim);
      }
 }
